@@ -1,10 +1,17 @@
 package com.starzplay.assignment.controller;
 
 import com.starzplay.assignment.dto.PaymentMethodDTO;
+import com.starzplay.assignment.dto.PaymentMethodRequestDTO;
 import com.starzplay.assignment.service.PaymentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/api/v1.0/configuration/payment-methods")
 public class PaymentController {
 
@@ -34,4 +42,17 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getAllPaymentMethods());
     }
 
+    @PostMapping
+    public ResponseEntity<List<PaymentMethodDTO>> createPaymentMethods(
+            @RequestBody List<@Valid PaymentMethodRequestDTO> requests) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(paymentService.createPaymentMethods(requests));
+    }
+
+    @PutMapping
+    public ResponseEntity<PaymentMethodDTO> updatePaymentMethod(
+            @RequestParam("payment-methods") Integer id,
+            @Valid @RequestBody PaymentMethodRequestDTO request) {
+        return ResponseEntity.ok(paymentService.updatePaymentMethod(id, request));
+    }
 }
