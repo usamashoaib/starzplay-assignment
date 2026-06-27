@@ -2,6 +2,7 @@ package com.starzplay.assignment.controller;
 
 import com.starzplay.assignment.dto.PaymentMethodDTO;
 import com.starzplay.assignment.dto.PaymentMethodRequestDTO;
+import com.starzplay.assignment.dto.PaymentMethodsResponse;
 import com.starzplay.assignment.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,28 +32,36 @@ public class PaymentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PaymentMethodDTO>> getPaymentMethods(
+    public ResponseEntity<PaymentMethodsResponse> getPaymentMethods(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String country) {
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) Integer id) {
+        List<PaymentMethodDTO> methods;
         if (name != null) {
-            return ResponseEntity.ok(paymentService.getPaymentMethodsByName(name));
+            methods = paymentService.getPaymentMethodsByName(name);
         } else if (country != null) {
-            return ResponseEntity.ok(paymentService.getPaymentMethodsByCountry(country));
+            methods = paymentService.getPaymentMethodsByCountry(country);
+        } else if (id != null) {
+            methods = paymentService.getPaymentMethodsByPlanId(id);
+        } else {
+            methods = paymentService.getAllPaymentMethods();
         }
-        return ResponseEntity.ok(paymentService.getAllPaymentMethods());
+        return ResponseEntity.ok(new PaymentMethodsResponse(methods));
     }
 
     @PostMapping
-    public ResponseEntity<List<PaymentMethodDTO>> createPaymentMethods(
+    public ResponseEntity<PaymentMethodsResponse> createPaymentMethods(
             @RequestBody List<@Valid PaymentMethodRequestDTO> requests) {
+        List<PaymentMethodDTO> created = paymentService.createPaymentMethods(requests);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(paymentService.createPaymentMethods(requests));
+                .body(new PaymentMethodsResponse(created));
     }
 
     @PutMapping
-    public ResponseEntity<PaymentMethodDTO> updatePaymentMethod(
+    public ResponseEntity<PaymentMethodsResponse> updatePaymentMethod(
             @RequestParam("payment-methods") Integer id,
             @Valid @RequestBody PaymentMethodRequestDTO request) {
-        return ResponseEntity.ok(paymentService.updatePaymentMethod(id, request));
+        PaymentMethodDTO updated = paymentService.updatePaymentMethod(id, request);
+        return ResponseEntity.ok(new PaymentMethodsResponse(List.of(updated)));
     }
 }

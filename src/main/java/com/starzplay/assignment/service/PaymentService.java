@@ -9,6 +9,7 @@ public interface PaymentService {
     List<PaymentMethodDTO> getAllPaymentMethods();
     List<PaymentMethodDTO> getPaymentMethodsByName(String name);
     List<PaymentMethodDTO> getPaymentMethodsByCountry(String country);
+    List<PaymentMethodDTO> getPaymentMethodsByPlanId(Integer planId);
     List<PaymentMethodDTO> createPaymentMethods(List<PaymentMethodRequestDTO> requests);
     PaymentMethodDTO updatePaymentMethod(Integer id, PaymentMethodRequestDTO request);
 }

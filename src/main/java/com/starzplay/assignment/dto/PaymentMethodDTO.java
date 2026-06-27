@@ -1,5 +1,6 @@
 package com.starzplay.assignment.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.starzplay.assignment.entity.PaymentMethod;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class PaymentMethodDTO {
     private String paymentType;
     @JsonProperty("country")
     private String country;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonProperty("paymentPlans")
     private List<PaymentPlanDTO> paymentPlans;
 
