@@ -2,11 +2,13 @@ package com.starzplay.assignment.service.impl;
 
 import com.starzplay.assignment.dto.PaymentMethodDTO;
 import com.starzplay.assignment.dto.PaymentMethodRequestDTO;
+import com.starzplay.assignment.dto.PaymentPlanDTO;
 import com.starzplay.assignment.dto.PaymentPlanRequestDTO;
 import com.starzplay.assignment.entity.PaymentMethod;
 import com.starzplay.assignment.entity.PaymentPlan;
 import com.starzplay.assignment.exception.ResourceNotFoundException;
 import com.starzplay.assignment.repository.PaymentMethodRepository;
+import com.starzplay.assignment.repository.PaymentPlanRepository;
 import com.starzplay.assignment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
+
+    @Autowired
+    private PaymentPlanRepository paymentPlanRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,6 +47,26 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentMethodRepository.findByCountry(country).stream()
                 .map(PaymentMethodDTO::convertToDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaymentMethodDTO> getPaymentMethodsByPlanId(Integer planId) {
+        // Returns the owning payment method, exposing only the matching plan
+        return paymentPlanRepository.findById(planId)
+                .map(plan -> {
+                    PaymentMethod method = plan.getPaymentMethod();
+                    PaymentMethodDTO dto = new PaymentMethodDTO(
+                            method.getName(),
+                            method.getDisplayName(),
+                            method.getPaymentType(),
+                            method.getCountry(),
+                            List.of(new PaymentPlanDTO(
+                                    plan.getId(), plan.getNetAmount(), plan.getTaxAmount(),
+                                    plan.getGrossAmount(), plan.getCurrency(), plan.getDuration())));
+                    return List.of(dto);
+                })
+                .orElse(List.of());
     }
 
     @Override
