@@ -24,7 +24,8 @@ public class LoggingAspect {
 
     private static final String MASK = "****";
 
-    @Around("within(com.starzplay.assignment..*) && !within(com.starzplay.assignment.security..*)")
+    @Around("within(com.starzplay.assignment..*) && !within(com.starzplay.assignment.security..*) "
+            + "&& !within(com.starzplay.assignment.filter..*)")
     public Object logMethodExecution(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().toShortString();
         Object[] methodArgs = joinPoint.getArgs();
