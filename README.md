@@ -57,3 +57,8 @@ Errors are returned in a standard shape:
 ```json
 { "description": "missing payment method name", "httpStatusCode": "400", "requestId": "..." }
 ```
+
+## Optimizations
+
+GET responses are cached in-memory with Caffeine (10-minute TTL). Creating or updating a
+payment method evicts the caches, so reads stay fast without serving stale data.
