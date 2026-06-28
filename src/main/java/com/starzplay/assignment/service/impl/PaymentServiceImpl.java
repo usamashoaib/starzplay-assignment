@@ -1,5 +1,6 @@
 package com.starzplay.assignment.service.impl;
 
+import com.starzplay.assignment.config.CacheConfig;
 import com.starzplay.assignment.dto.PaymentMethodDTO;
 import com.starzplay.assignment.dto.PaymentMethodRequestDTO;
 import com.starzplay.assignment.dto.PaymentPlanDTO;
@@ -11,6 +12,8 @@ import com.starzplay.assignment.repository.PaymentMethodRepository;
 import com.starzplay.assignment.repository.PaymentPlanRepository;
 import com.starzplay.assignment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.PAYMENT_METHODS, key = "'all'")
     public List<PaymentMethodDTO> getAllPaymentMethods() {
         return paymentMethodRepository.findAll().stream()
                 .map(PaymentMethodDTO::convertToDTO)
@@ -35,6 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.PAYMENT_METHODS, key = "'name:' + #name")
     public List<PaymentMethodDTO> getPaymentMethodsByName(String name) {
         return paymentMethodRepository.findByName(name).stream()
                 .map(PaymentMethodDTO::convertToDTO)
@@ -43,6 +48,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.PAYMENT_METHODS, key = "'country:' + #country")
     public List<PaymentMethodDTO> getPaymentMethodsByCountry(String country) {
         return paymentMethodRepository.findByCountry(country).stream()
                 .map(PaymentMethodDTO::convertToDTO)
@@ -51,6 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.PAYMENT_METHODS, key = "'plan:' + #planId")
     public List<PaymentMethodDTO> getPaymentMethodsByPlanId(Integer planId) {
         // Returns the owning payment method, exposing only the matching plan
         return paymentPlanRepository.findById(planId)
@@ -71,6 +78,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {CacheConfig.PAYMENT_METHODS, CacheConfig.PAYMENT_PLANS_BY_DURATION},
+            allEntries = true)
     public List<PaymentMethodDTO> createPaymentMethods(List<PaymentMethodRequestDTO> requests) {
         List<PaymentMethod> entities = requests.stream()
                 .map(this::toEntity)
@@ -82,6 +91,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {CacheConfig.PAYMENT_METHODS, CacheConfig.PAYMENT_PLANS_BY_DURATION},
+            allEntries = true)
     public PaymentMethodDTO updatePaymentMethod(Integer id, PaymentMethodRequestDTO request) {
         PaymentMethod existing = paymentMethodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("payment method not found for id " + id));

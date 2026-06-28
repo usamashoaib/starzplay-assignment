@@ -1,9 +1,11 @@
 package com.starzplay.assignment.service.impl;
 
+import com.starzplay.assignment.config.CacheConfig;
 import com.starzplay.assignment.dto.PaymentPlanDTO;
 import com.starzplay.assignment.repository.PaymentPlanRepository;
 import com.starzplay.assignment.service.PaymentPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.starzplay.assignment.entity.PaymentPlan;
 
@@ -18,6 +20,7 @@ public class PaymentPlanServiceImpl implements PaymentPlanService {
     private PaymentPlanRepository paymentPlanRepository;
 
     @Override
+    @Cacheable(cacheNames = CacheConfig.PAYMENT_PLANS_BY_DURATION, key = "'all'")
     public Map<String, List<PaymentPlanDTO>> getPaymentPlansGroupedByDuration() {
         return paymentPlanRepository.findAll().stream()
                 .collect(Collectors.groupingBy(
